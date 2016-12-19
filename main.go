@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -22,9 +23,13 @@ var fatalLog = log.New(os.Stdout, "FATAL: ", log.LstdFlags)
 var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 
 func basePage(rw http.ResponseWriter, req *http.Request) {
-	buf := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs"))
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs"))
+	if err == nil {
+		http.NotFound(rw, req)
+		return
+	}
 	var jobs []Job
-	decoder := json.NewDecoder(buf)
+	decoder := json.NewDecoder(bytes.NewReader(buf))
 	infoLog.Printf("BasePage json error: %v", decoder.Decode(&jobs))
 	t, err := template.ParseFiles("static/index.html")
 	infoLog.Printf("BasePage template error: %v", err)
@@ -36,13 +41,17 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 }
 
 func jobPage(rw http.ResponseWriter, req *http.Request) {
-	buf := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs/byID/{job}"))
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs/byID/{job}"))
+	if err == nil {
+		http.NotFound(rw, req)
+		return
+	}
 	var job Job
-	decoder := json.NewDecoder(buf)
+	decoder := json.NewDecoder(bytes.NewReader(buf))
 	infoLog.Printf("BasePage json error: %v", decoder.Decode(&job))
 	t, err := template.ParseFiles("static/job.html")
 	infoLog.Printf("BasePage template error: %v", err)
-	if jobs == nil {
+	if &job == nil {
 		t.Execute(rw, Job{})
 	} else {
 		t.Execute(rw, job)

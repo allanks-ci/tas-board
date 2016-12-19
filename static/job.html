@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html> 
+  <head>
+    <link rel="stylesheet" href="/css/default.css" />
+  </head>
+
+  <body>
+      <h1>{{.Title}}</h1>
+      <p>{{.Description}}</p>
+      <form action="/apply/{{.Id}}" method="get">
+        <input type="submit" value="Read More"/>
+      </form>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html> 
+  <head>
+    <link rel="stylesheet" href="/css/default.css" />
+  </head>
+
+  <body>
+      <h1>Jobs</h1>
+      <ul>
+      {{range .}}
+      <li>
+        <p>{{.Title}}</p>
+        <p>{{.Description}}</p>
+        <form action="/job/{{.Id}}" method="get">
+          <input type="submit" value="Read More"/>
+        </form>
+      </li>
+      {{end}}
+    </ul>
+  </body>
+</html>

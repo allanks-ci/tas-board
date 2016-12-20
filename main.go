@@ -25,7 +25,7 @@ var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 func basePage(rw http.ResponseWriter, req *http.Request) {
 	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/tas/jobs"))
 	if err == nil {
-		http.NotFound(rw, req)
+		errorHandler(rw, req, 404, err)
 		return
 	}
 	var jobs []Job
@@ -43,7 +43,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 func jobPage(rw http.ResponseWriter, req *http.Request) {
 	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("tas/jobs/byID/{job}"))
 	if err == nil {
-		http.NotFound(rw, req)
+		errorHandler(rw, req, 404, err)
 		return
 	}
 	var job Job
@@ -61,6 +61,13 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 func apply(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	http.Redirect(rw, req, getURL(fmt.Sprintf("tas/apply/%v", vars["job"])), http.StatusSeeOther)
+}
+
+func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprintf(w, "404 Not found\nError: %v", err)
+	}
 }
 
 func main() {

@@ -24,7 +24,7 @@ var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 
 func basePage(rw http.ResponseWriter, req *http.Request) {
 	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/tas/jobs"))
-	if err == nil {
+	if err != nil {
 		errorHandler(rw, req, 404, err)
 		return
 	}
@@ -42,7 +42,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 
 func jobPage(rw http.ResponseWriter, req *http.Request) {
 	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("tas/jobs/byID/{job}"))
-	if err == nil {
+	if err != nil {
 		errorHandler(rw, req, 404, err)
 		return
 	}

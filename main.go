@@ -23,7 +23,7 @@ var fatalLog = log.New(os.Stdout, "FATAL: ", log.LstdFlags)
 var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 
 func basePage(rw http.ResponseWriter, req *http.Request) {
-	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs"))
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/tas/jobs"))
 	if err == nil {
 		http.NotFound(rw, req)
 		return
@@ -41,7 +41,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 }
 
 func jobPage(rw http.ResponseWriter, req *http.Request) {
-	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("/tas/devs/tas/jobs/byID/{job}"))
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("tas/jobs/byID/{job}"))
 	if err == nil {
 		http.NotFound(rw, req)
 		return
@@ -60,7 +60,7 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 
 func apply(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	http.Redirect(rw, req, getURL(fmt.Sprintf("/tas/devs/tas/apply/%v", vars["job"])), http.StatusSeeOther)
+	http.Redirect(rw, req, getURL(fmt.Sprintf("tas/apply/%v", vars["job"])), http.StatusSeeOther)
 }
 
 func main() {

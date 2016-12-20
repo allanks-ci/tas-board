@@ -42,7 +42,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 
 func jobPage(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL(fmt.Sprintf("tas/jobs/byID/%v", vars["job"])))
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL(fmt.Sprintf("devs/tas/jobs/byID/%v", vars["job"])))
 	if err != nil {
 		errorHandler(rw, req, 404, err)
 		return

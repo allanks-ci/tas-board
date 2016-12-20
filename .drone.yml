@@ -27,7 +27,7 @@ publish:
       - echo "Removing tas-board"
       - docker rm tas-board
       - echo "Starting tas-board"
-      - docker run -d -e "IO_TAZZY_URL=http://board.tazzy.io" -e "IO_TAZZY_SECRET=$$TAZZY_SECRET" -e "APP_SHORTCODE=board" -v /db/bolt/tas-board:/db --name tas-board -p 8084:8080 allanks/tas-board
+      - docker run -d -e "IO_TAZZY_URL=http://board.tazzy.io" -e "IO_TAZZY_SECRET=$$TAZZY_SECRET" -e "APP_SHORTCODE=board" --name tas-board -p 8084:8080 allanks/tas-board
     when:
       branch: master
       event: push

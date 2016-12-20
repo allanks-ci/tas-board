@@ -87,7 +87,7 @@ func getHTTP(tenant, url string) ([]byte, error) {
 
 func doHTTP(req *http.Request, tenant string) ([]byte, error) {
 	req.Header.Set("tazzy-secret", os.Getenv("IO_TAZZY_SECRET"))
-	req.Header.Set("tazzy-tenant", os.Getenv("APP_SHORTCODE"))
+	req.Header.Set("tazzy-tenant", os.Getenv(tenant))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

@@ -24,6 +24,10 @@ type application struct {
 	Email string `json:"email"`
 }
 
+type attributes struct {
+	Email string `json:"tas.personal.email"`
+}
+
 var fatalLog = log.New(os.Stdout, "FATAL: ", log.LstdFlags)
 var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 

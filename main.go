@@ -19,6 +19,11 @@ type Job struct {
 	Description string `json:"description"`
 }
 
+type application struct {
+	Job   string `json:"job"`
+	Email string `json:"email"`
+}
+
 var fatalLog = log.New(os.Stdout, "FATAL: ", log.LstdFlags)
 var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 
@@ -61,12 +66,22 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 
 func apply(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/allan/apply"))
+	email := getEmail(req.Header.Get("tazzy-tenant"), req.Header.Get("tazzy-saml"))
+	app := application{
+		Job:   vars["job"],
+		Email: email,
+	}
+	data, err := json.Marshal(&app)
 	if err != nil {
-		errorHandler(rw, req, 404, err)
+		infoLog.Printf("Apply json error: %v", err)
+		http.Error(rw, "Could not serialize input", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(rw, req, fmt.Sprintf("%v/apply/%v", string(buf), vars["job"]), http.StatusSeeOther)
+	_, err = postHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/allan/submit"), data)
+	infoLog.Printf("Apply post error: %v", err)
+	t, err := template.ParseFiles("static/thanks.html")
+	infoLog.Printf("Apply template error: %v", err)
+	t.Execute(rw, nil)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {
@@ -85,8 +100,27 @@ func main() {
 	fatalLog.Fatal(http.ListenAndServe(":8080", r))
 }
 
+func getEmail(tenant, saml string) string {
+	url := getURL(fmt.Sprintf("core/tenants/%s/saml/assertions/byKey/%s/json", tenant, saml))
+	jsonAttr, err := getHTTP(tenant, url)
+	infoLog.Printf("GetEmail json error", err)
+	if err != nil {
+		return ""
+	}
+
+	var attr attributes
+	infoLog.Printf("GetEmail attr error", json.Unmarshal(jsonAttr, &attr))
+	return attr.Email
+}
+
 func getHTTP(tenant, url string) ([]byte, error) {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Set("Content-Type", "application/json")
+	return doHTTP(req, tenant)
+}
+
+func postHTTP(tenant, url string, data []byte) ([]byte, error) {
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 	req.Header.Set("Content-Type", "application/json")
 	return doHTTP(req, tenant)
 }

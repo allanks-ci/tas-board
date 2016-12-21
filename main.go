@@ -61,7 +61,12 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 
 func apply(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	http.Redirect(rw, req, getURL(fmt.Sprintf("tas/apply/%v", vars["job"])), http.StatusSeeOther)
+	buf, err := getHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/allan/apply"))
+	if err != nil {
+		errorHandler(rw, req, 404, err)
+		return
+	}
+	http.Redirect(rw, req, getURL(fmt.Sprintf("%v/tas/apply/%v", string(buf), vars["job"])), http.StatusSeeOther)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {

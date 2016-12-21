@@ -66,7 +66,7 @@ func apply(rw http.ResponseWriter, req *http.Request) {
 		errorHandler(rw, req, 404, err)
 		return
 	}
-	http.Redirect(rw, req, getURL(fmt.Sprintf("%v/tas/apply/%v", string(buf), vars["job"])), http.StatusSeeOther)
+	http.Redirect(rw, req, getURL(fmt.Sprintf("%v/apply/%v", string(buf), vars["job"])), http.StatusSeeOther)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {

@@ -17,11 +17,8 @@ type Job struct {
 	Id          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-}
-
-type application struct {
-	Job   string `json:"job"`
-	Email string `json:"email"`
+	Tazzy       string
+	Api         string
 }
 
 type attributes struct {
@@ -62,30 +59,12 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 	t, err := template.ParseFiles("static/job.html")
 	infoLog.Printf("BasePage template error: %v", err)
 	if &job == nil {
-		t.Execute(rw, Job{})
+		errorHandler(rw, req, 404, error.Error("Job not found"))
 	} else {
+		job.Tazzy = os.Getenv("IO_TAZZY_URL")
+		job.Api = fmt.Sprintf("devs/allan/apply/%v", job.Id)
 		t.Execute(rw, job)
 	}
-}
-
-func apply(rw http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	email := getEmail(req.Header.Get("tazzy-tenant"), req.Header.Get("tazzy-saml"))
-	app := application{
-		Job:   vars["job"],
-		Email: email,
-	}
-	data, err := json.Marshal(&app)
-	if err != nil {
-		infoLog.Printf("Apply json error: %v", err)
-		http.Error(rw, "Could not serialize input", http.StatusInternalServerError)
-		return
-	}
-	_, err = postHTTP(req.Header.Get("tazzy-tenant"), getURL("devs/allan/submit"), data)
-	infoLog.Printf("Apply post error: %v", err)
-	t, err := template.ParseFiles("static/thanks.html")
-	infoLog.Printf("Apply template error: %v", err)
-	t.Execute(rw, nil)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {
@@ -99,32 +78,12 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", basePage)
 	r.HandleFunc("/job/{job}", jobPage)
-	r.HandleFunc("/apply/{job}", apply)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	fatalLog.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func getEmail(tenant, saml string) string {
-	url := getURL(fmt.Sprintf("core/tenants/%s/saml/assertions/byKey/%s/json", tenant, saml))
-	jsonAttr, err := getHTTP(tenant, url)
-	infoLog.Printf("GetEmail json error", err)
-	if err != nil {
-		return ""
-	}
-
-	var attr attributes
-	infoLog.Printf("GetEmail attr error", json.Unmarshal(jsonAttr, &attr))
-	return attr.Email
-}
-
 func getHTTP(tenant, url string) ([]byte, error) {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Content-Type", "application/json")
-	return doHTTP(req, tenant)
-}
-
-func postHTTP(tenant, url string, data []byte) ([]byte, error) {
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 	req.Header.Set("Content-Type", "application/json")
 	return doHTTP(req, tenant)
 }

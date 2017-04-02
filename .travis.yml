@@ -1,0 +1,14 @@
+language: bash
+
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker run --rm -v "$PWD":/go/src/github.com/allanks-ci/tas-board -w /go/src/github.com/allanks-ci/tas-board golang sh -c "go get; CGO_ENABLED=0 go build -o app"
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker build -t allanks/tas-board:"$TRAVIS_BUILD_NUMBER" .;
+        docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD";
+        docker push allanks/tas-board:"$TRAVIS_BUILD_NUMBER";
+    fi

@@ -3,7 +3,7 @@ EXPOSE 8080
 
 WORKDIR /server
 COPY static /server/static
-COPY main /server/tas-job
+COPY app /server/tas-board
 
-ENTRYPOINT ["./tas-job"]
+ENTRYPOINT ["./tas-board"]
 CMD [""]

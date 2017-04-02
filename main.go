@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -59,7 +60,7 @@ func jobPage(rw http.ResponseWriter, req *http.Request) {
 	t, err := template.ParseFiles("static/job.html")
 	infoLog.Printf("BasePage template error: %v", err)
 	if &job == nil {
-		errorHandler(rw, req, 404, error.Error("Job not found"))
+		errorHandler(rw, req, 404, errors.New("Job not found"))
 	} else {
 		job.Tazzy = os.Getenv("IO_TAZZY_URL")
 		job.Api = fmt.Sprintf("devs/allan/apply/%v", job.Id)
